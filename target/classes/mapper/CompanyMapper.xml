@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hu.dao.CompanyMapper">
+  <resultMap id="BaseResultMap" type="com.hu.pojo.Company">
+    <result column="comid" jdbcType="INTEGER" property="comid" />
+    <result column="comname" jdbcType="VARCHAR" property="comname" />
+    <result column="compho" jdbcType="INTEGER" property="compho" />
+    <result column="comaddress" jdbcType="VARCHAR" property="comaddress" />
+    <result column="cominfo" jdbcType="VARCHAR" property="cominfo" />
+  </resultMap>
+
+  <select id="selectCompanyBycomid" parameterType="int" resultMap="BaseResultMap">
+ select * from company where comid=#{id}
+ </select>
+
+  <update id="updatecp" parameterType="com.hu.pojo.Company">
+    update company
+    <set>
+      <if test="comname!=null"> comname=#{comname}, </if>
+      <if test="compho!=null"> compho=#{compho}, </if>
+      <if test="comaddress!=null"> comaddress=#{comaddress}, </if>
+      <if test="cominfo!=null"> cominfo=#{cominfo}, </if>
+    </set>
+    where comid=#{comid}
+  </update>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    comid, comname, compho, comaddress, cominfo
+  </sql>
+  <select id="selectByExample" parameterType="com.hu.pojo.CompanyExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from company
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.hu.pojo.CompanyExample">
+    delete from company
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.hu.pojo.Company">
+    insert into company (comid, comname, compho, comaddress,
+      cominfo)
+    values (#{comid,jdbcType=INTEGER}, #{comname,jdbcType=VARCHAR}, #{compho,jdbcType=INTEGER}, #{comaddress,jdbcType=VARCHAR},
+      #{cominfo,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hu.pojo.Company">
+    insert into company
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="comname != null">
+        comname,
+      </if>
+      <if test="compho != null">
+        compho,
+      </if>
+      <if test="comaddress != null">
+        comaddress,
+      </if>
+      <if test="cominfo != null">
+        cominfo,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="comname != null">
+        #{comname,jdbcType=VARCHAR},
+      </if>
+      <if test="compho != null">
+        #{compho,jdbcType=INTEGER},
+      </if>
+      <if test="comaddress != null">
+        #{comaddress,jdbcType=VARCHAR},
+      </if>
+      <if test="cominfo != null">
+        #{cominfo,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.hu.pojo.CompanyExample" resultType="java.lang.Long">
+    select count(*) from company
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update company
+    <set>
+      <if test="record.comname != null">
+        comname = #{record.comname,jdbcType=VARCHAR},
+      </if>
+      <if test="record.compho != null">
+        compho = #{record.compho,jdbcType=INTEGER},
+      </if>
+      <if test="record.comaddress != null">
+        comaddress = #{record.comaddress,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cominfo != null">
+        cominfo = #{record.cominfo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update company
+    set comname = #{record.comname,jdbcType=VARCHAR},
+    compho = #{record.compho,jdbcType=INTEGER},
+    comaddress = #{record.comaddress,jdbcType=VARCHAR},
+    cominfo = #{record.cominfo,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+</mapper>

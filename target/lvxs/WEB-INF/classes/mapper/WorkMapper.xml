@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hu.dao.WorkMapper">
+    <resultMap id="BaseResultMap" type="com.hu.pojo.Work">
+        <id column="workid" jdbcType="INTEGER" property="workid"/>
+        <result column="workname" jdbcType="VARCHAR" property="workname"/>
+        <result column="worktime" jdbcType="DATE" property="worktime"/>
+        <result column="workstatus" jdbcType="INTEGER" property="workstatus"/>
+        <result column="workday" jdbcType="DATE" property="workday"/>
+        <result column="workmoney" jdbcType="INTEGER" property="workmoney"/>
+
+        <association property="line" javaType="com.hu.pojo.Line">
+            <id column="lineid" property="lineid"/>
+            <result column="lineap" property="lineap"/>
+            <result column="linebp" property="linebp"/>
+            <result column="lineday" property="lineday"/>
+        </association>
+
+        <association property="customer" javaType="com.hu.pojo.Customer">
+            <id column="customerid" property="customerid"/>
+            <result column="customername" property="customername"/>
+            <result column="customerpho" property="customerpho"/>
+        </association>
+    </resultMap>
+    <select id="echart1" parameterType="com.hu.pojo.Work" resultType="com.hu.util.WorkEchart">
+    SELECT DATE_FORMAT(worktime,"%m月") AS work_date,COUNT(*) AS COUNT FROM WORK GROUP BY DATE_FORMAT(worktime,"%Y年%m月")
+    </select>
+    <select id="echart2" parameterType="com.hu.pojo.Work" resultType="com.hu.util.WorkEchart">
+    SELECT DATE_FORMAT(worktime,"%m月") AS work_date,
+    COUNT(IF(workstatus=0,TRUE,NULL)) AS noo,
+    COUNT(IF(workstatus=1,TRUE,NULL)) AS yess
+    FROM WORK GROUP BY DATE_FORMAT(worktime,"%Y年%m月")
+    </select>
+    <select id="echart3" parameterType="com.hu.pojo.Work" resultType="com.hu.util.WorkEchart">
+    SELECT DATE_FORMAT(workday,"%m月") AS work_day,COUNT(*) AS COUNT,SUM(workmoney) AS work_money FROM WORK GROUP BY DATE_FORMAT(workday,"%Y年%m月")
+    </select>
+    <select id="echart4" parameterType="com.hu.pojo.Work" resultType="com.hu.util.WorkEchart">
+    SELECT SUM(workmoney) AS work_money, QUARTER( workday ) AS work_day
+    FROM WORK
+    GROUP BY work_day
+    </select>
+    <select id="selectALL" parameterType="int" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid
+  </select>
+
+    <insert id="addwork">
+   insert into work(workmoney,lnum,workstatus,worktime) value (#{workmoney},#{lid},"0",#{worktime})
+  </insert>
+
+
+    <insert id="addcus">
+    insert into customer(customername,customerpho) value (#{cname},#{cpho})
+  </insert>
+
+    <update id="checkadd">
+    update work set cnum=(select customerid from customer where customerpho=#{cpho}) where lnum=#{lid}
+  </update>
+
+    <delete id="deletework">
+    delete from work where workid=#{id}
+  </delete>
+
+    <select id="checkname" parameterType="com.hu.pojo.CusandLine" resultType="com.hu.pojo.Customer">
+    select * from customer where customername=#{cname} and customerpho=#{cpho}
+  </select>
+
+
+    <select id="selectworkline" parameterType="int" resultMap="BaseResultMap">
+    select * from line
+  </select>
+
+    <select id="selectworkbyid" parameterType="int" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid and w.workid=#{id}
+  </select>
+
+    <update id="updatework" parameterType="com.hu.pojo.CusandLine">
+    update work set lnum=#{lid},worktime=#{worktime},workmoney=#{workmoney},workstatus=#{workstatus},workday=#{workday} where workid=#{workid}
+  </update>
+
+
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    workid, workname, worktime, workstatus, workday, workmoney
+  </sql>
+    <select id="selectByExample" parameterType="com.hu.pojo.WorkExample" resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from work
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from work
+        where workid = #{workid,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from work
+    where workid = #{workid,jdbcType=INTEGER}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.hu.pojo.WorkExample">
+        delete from work
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.hu.pojo.Work">
+    insert into work (workid, workname, worktime, 
+      workstatus, workday, workmoney
+      )
+    values (#{workid,jdbcType=INTEGER}, #{workname,jdbcType=VARCHAR}, #{worktime,jdbcType=DATE}, 
+      #{workstatus,jdbcType=INTEGER}, #{workday,jdbcType=DATE}, #{workmoney,jdbcType=INTEGER}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.hu.pojo.Work">
+        insert into work
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="workid != null">
+                workid,
+            </if>
+            <if test="workname != null">
+                workname,
+            </if>
+            <if test="worktime != null">
+                worktime,
+            </if>
+            <if test="workstatus != null">
+                workstatus,
+            </if>
+            <if test="workday != null">
+                workday,
+            </if>
+            <if test="workmoney != null">
+                workmoney,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="workid != null">
+                #{workid,jdbcType=INTEGER},
+            </if>
+            <if test="workname != null">
+                #{workname,jdbcType=VARCHAR},
+            </if>
+            <if test="worktime != null">
+                #{worktime,jdbcType=DATE},
+            </if>
+            <if test="workstatus != null">
+                #{workstatus,jdbcType=INTEGER},
+            </if>
+            <if test="workday != null">
+                #{workday,jdbcType=DATE},
+            </if>
+            <if test="workmoney != null">
+                #{workmoney,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.hu.pojo.WorkExample" resultType="java.lang.Long">
+        select count(*) from work
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update work
+        <set>
+            <if test="record.workid != null">
+                workid = #{record.workid,jdbcType=INTEGER},
+            </if>
+            <if test="record.workname != null">
+                workname = #{record.workname,jdbcType=VARCHAR},
+            </if>
+            <if test="record.worktime != null">
+                worktime = #{record.worktime,jdbcType=DATE},
+            </if>
+            <if test="record.workstatus != null">
+                workstatus = #{record.workstatus,jdbcType=INTEGER},
+            </if>
+            <if test="record.workday != null">
+                workday = #{record.workday,jdbcType=DATE},
+            </if>
+            <if test="record.workmoney != null">
+                workmoney = #{record.workmoney,jdbcType=INTEGER},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update work
+        set workid = #{record.workid,jdbcType=INTEGER},
+        workname = #{record.workname,jdbcType=VARCHAR},
+        worktime = #{record.worktime,jdbcType=DATE},
+        workstatus = #{record.workstatus,jdbcType=INTEGER},
+        workday = #{record.workday,jdbcType=DATE},
+        workmoney = #{record.workmoney,jdbcType=INTEGER}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hu.pojo.Work">
+        update work
+        <set>
+            <if test="workname != null">
+                workname = #{workname,jdbcType=VARCHAR},
+            </if>
+            <if test="worktime != null">
+                worktime = #{worktime,jdbcType=DATE},
+            </if>
+            <if test="workstatus != null">
+                workstatus = #{workstatus,jdbcType=INTEGER},
+            </if>
+            <if test="workday != null">
+                workday = #{workday,jdbcType=DATE},
+            </if>
+            <if test="workmoney != null">
+                workmoney = #{workmoney,jdbcType=INTEGER},
+            </if>
+        </set>
+        where workid = #{workid,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hu.pojo.Work">
+    update work
+    set workname = #{workname,jdbcType=VARCHAR},
+      worktime = #{worktime,jdbcType=DATE},
+      workstatus = #{workstatus,jdbcType=INTEGER},
+      workday = #{workday,jdbcType=DATE},
+      workmoney = #{workmoney,jdbcType=INTEGER}
+    where workid = #{workid,jdbcType=INTEGER}
+  </update>
+    <select id="searchworkday" parameterType="com.hu.pojo.Work" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid and w.workday=#{workday}
+  </select>
+
+    <select id="searchwstatus" parameterType="com.hu.pojo.Work" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid and w.workstatus=#{workstatus}
+  </select>
+
+    <select id="searchpay0" parameterType="com.hu.pojo.Work" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid and w.workday is not null
+  </select>
+
+    <select id="searchpay1" parameterType="com.hu.pojo.Work" resultMap="BaseResultMap">
+    select w.*,c.customername,c.customerpho,l.lineap,l.linebp,l.lineday,l.lineid
+    from customer c,line l ,work w
+    where l.lineid=w.lnum and w.cnum=c.customerid and w.workday is null
+  </select>
+
+</mapper>
